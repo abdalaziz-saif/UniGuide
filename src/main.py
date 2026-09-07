@@ -5,6 +5,8 @@ from routes import nlp
 from motor.motor_asyncio import AsyncIOMotorClient  
 from helpers import get_settings 
 from stores.llm import LLMFactory
+from stores.llm.template.template_parser import Templateparser
+from stores.vectorDB import VectorDBFactory
 
 app = FastAPI()
 
@@ -25,6 +27,18 @@ async def on_start_up():
     app.embedding_model = llm_provider_factory.create(provider=settings.EMBEDDING_BACKEND)
     app.embedding_model.set_embedding_model(settings.EMBEDDING_MODEL_ID , settings.EMBEDDING_MODEL_SIZE)
 
+    #VectorDB Client 
+ 
+    app.vectordb_client = VectorDBFactory(settings)
+    app.vectordb_client.create(provider=settings.VECTOR_DB_BACKEND)
+    app.vectordb_client.connect()
+
+
+    #Generationn Template 
+    app.template = Templateparser(
+        language=settings.PRIMARY_LANGUAGE,
+        default_language=settings.DEFAULT_LANGUAGE
+    )
     
 
 # turn it off when shutdown app 

@@ -33,5 +33,10 @@ class Settings(BaseSettings):
     VECTOR_DB_PATH: str
     VECTOR_DB_DISTANCE_METHOD: str 
 
+    # ========================= Generation Language Config =========================
+    PRIMARY_LANGUAGE : str
+    DEFAULT_LANGUAGE : str 
+
+
 def get_settings():
     return Settings()
