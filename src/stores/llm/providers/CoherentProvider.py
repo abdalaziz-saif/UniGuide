@@ -24,8 +24,8 @@ class CohereProvider(llm_interface):
         self.embedding_size = None
 
         self.client = cohere.Client(
-            api_key = self.api_key
-            api_url = self.api_url
+            api_key = self.api_key,
+            base_url = self.api_url
         )
 
         self.logger = logging.getLogger(__name__)
@@ -78,9 +78,9 @@ class CohereProvider(llm_interface):
             return None
 
 
-        input_type = CoHereEnums.DOCUMENT
-        if document_type == DocumentTypeEnum.QUERY:
-            input_type = CoHereEnums.QUERY
+        input_type = CoHereEnums.DOCUMENT.value
+        if document_type == DocumentTypeEnum.QUERY.value:
+            input_type = CoHereEnums.QUERY.value
 
         response = self.client.embed(
             model = self.embedding_model_id,
@@ -94,6 +94,32 @@ class CohereProvider(llm_interface):
             return None
         
         return response.embeddings.float[0] 
+
+    def embed_texts(self, texts: list[str], document_type: str = None):
+        if not self.client:
+            self.logger.error("CoHere client was not set")
+            return None
+
+        if not self.embedding_model_id:
+            self.logger.error("Embedding model for CoHere was not set")
+            return None
+
+        input_type = CoHereEnums.DOCUMENT.value
+        if document_type == DocumentTypeEnum.QUERY.value:
+            input_type = CoHereEnums.QUERY.value
+
+        response = self.client.embed(
+            model=self.embedding_model_id,
+            texts=[self.process_text(text) for text in texts],
+            input_type=input_type,
+            embedding_types=['float'],
+        )
+
+        if not response or not response.embeddings or not response.embeddings.float:
+            self.logger.error("Error while embedding texts with CoHere")
+            return None
+
+        return response.embeddings.float
 
     def construct_prompt(self, prompt: str, role: str):
         return {

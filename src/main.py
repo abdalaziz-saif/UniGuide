@@ -29,13 +29,12 @@ async def on_start_up():
 
     #VectorDB Client 
  
-    app.vectordb_client = VectorDBFactory(settings)
-    app.vectordb_client.create(provider=settings.VECTOR_DB_BACKEND)
+    app.vectordb_client = VectorDBFactory(settings).create(provider=settings.VECTOR_DB_BACKEND)
     app.vectordb_client.connect()
 
 
     #Generationn Template 
-    app.template = Templateparser(
+    app.template_parser = Templateparser(
         language=settings.PRIMARY_LANGUAGE,
         default_language=settings.DEFAULT_LANGUAGE
     )
@@ -49,4 +48,4 @@ async def on_shutdown():
 # include the base_route in the main app
 app.include_router(base.base_route)
 app.include_router(data.data_route)
-app.include_router(nlp.nlp_route)
+app.include_router(nlp.nlp_router)

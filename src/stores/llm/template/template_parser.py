@@ -2,18 +2,18 @@ import os
 
 class Templateparser:
 
-    def __init__(self, language: str=None, default_language: str) :
-        self.language = None
+    def __init__(self, language: str = None, default_language: str = "en"):
         self.default_language = default_language
         self.current_path = os.path.dirname(os.path.abspath(__file__))
+        self.set_language(language)
 
 
     def set_language (self, language):
         if not language : 
-            self.language = self.default_language
+            language = self.default_language
 
 
-        language_path = self.current_path.language
+        language_path = os.path.join(self.current_path, "locales", language)
         if os.path.exists(language_path):
             self.language = language 
         else : 
@@ -37,7 +37,7 @@ class Templateparser:
             return None
         
         # import group module
-        module = __import__(f"stores.llm.templates.locales.{targeted_language}.{group}", fromlist=[group])
+        module = __import__(f"stores.llm.template.locales.{targeted_language}.{group}", fromlist=[group])
 
 
         if not module:

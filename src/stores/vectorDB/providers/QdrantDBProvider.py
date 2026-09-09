@@ -18,7 +18,7 @@ class QdrantDBProvider(VectorDBInterface):
         self.client = None
         self.file_path = file_path
         self.distance_methode = distance_methode
-        self.logger = logging.get_logger(__name__)
+        self.logger = logging.getLogger(__name__)
 
     def connect(self):
         self.client = QdrantClient(path= self.file_path)
@@ -28,7 +28,7 @@ class QdrantDBProvider(VectorDBInterface):
 
 
     def is_collection_existed(self, collection_name: str) -> bool:
-        return self.client.collection_exist(collection_name)
+        return self.client.collection_exists(collection_name)
         
     def list_all_collections(self) -> List:
         return self.client.get_collections()
@@ -36,7 +36,7 @@ class QdrantDBProvider(VectorDBInterface):
     def delete_collection(self, collection_name: str): 
 
         if self.is_collection_existed(collection_name):
-            return self.client.delete(collection_name)
+            return self.client.delete_collection(collection_name=collection_name)
 
     def get_collection_info(self, collection_name: str) -> dict:
         return self.client.get_collection(collection_name=collection_name)
@@ -67,7 +67,7 @@ class QdrantDBProvider(VectorDBInterface):
                 collection_name=collection_name,
                 points=[
                 PointStruct(
-                        id = [record_id],
+                    id = record_id,
                         vector= vector,
                         payload={
                             'text' :text ,
@@ -102,12 +102,15 @@ class QdrantDBProvider(VectorDBInterface):
 
             points = [
                 PointStruct(
-                    id = batch_record_ids,
-                    vector=batch_vectors, 
+                    id=record_id,
+                    vector=vector,
                     payload={
-                        'texts': batch_texts  , 'metadata' :batch_metadata
+                        'text': text, 'metadata': item_metadata
                     }
-                ) 
+                )
+                for record_id, vector, text, item_metadata in zip(
+                    batch_record_ids, batch_vectors, batch_texts, batch_metadata
+                )
             ]
             try :
                _=  self.client.upsert(
@@ -118,15 +121,23 @@ class QdrantDBProvider(VectorDBInterface):
                 self.logger.error(f"Error while inserting records : {e}")
                 return False
 
-            return True 
+            return True
 
     def search_by_vector(self, collection_name: str, vector: list, limit: int = 5):
 
-            results= self.client.search(
-            collection_name=collection_name,
-            query_vector=vector,
-            limit=limit
-            )
+            if hasattr(self.client, "query_points"):
+                response = self.client.query_points(
+                    collection_name=collection_name,
+                    query=vector,
+                    limit=limit,
+                )
+                results = response.points
+            else:
+                results = self.client.search(
+                    collection_name=collection_name,
+                    query_vector=vector,
+                    limit=limit,
+                )
 
             if not results or len(results)== 0 :
                 return None 

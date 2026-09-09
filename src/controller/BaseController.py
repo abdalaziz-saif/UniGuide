@@ -1,4 +1,3 @@
-from math import _SupportsProdNoDefaultT
 
 from helpers.Config  import get_settings   
 import os 
@@ -27,7 +26,7 @@ class BaseController :
               db_name 
          ) 
 
-         if not os.path.exist(path):
+         if not os.path.exists(path):
               os.makedirs(path)
 
          return path 

@@ -1,6 +1,5 @@
 from fastapi import FastAPI, APIRouter, status, Request
 from fastapi.responses import JSONResponse
-from profiling.sampling import JsonlCollector
 from routes.schemes.nlp import PushRequest, SearchRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
@@ -28,7 +27,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
                 db_client=request.app.client_db)
 
 
-        project = project_model.get_project_or_create(project_id=project_id)
+        project = await project_model.get_project_or_create(project_id=project_id)
 
         if not project:
             return JSONResponse(
@@ -64,10 +63,10 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
             chunks_ids =  list(range(idx, idx + len(page_chunks)))
             idx += len(page_chunks)
             
-            is_inserted = nlp_Controller.index_into_vector_db(
+            is_inserted = nlp_Controller.index_into_vectordb(
                 project=project,
                 chunks=page_chunks,
-                do_reset=push_request.do_reset,
+                do_reset=bool(push_request.do_reset) and page_no == 2,
                 chunks_ids=chunks_ids
             )
 
@@ -94,7 +93,7 @@ async def get_collection_info(request:Request, project_id:str ):
         project_model = await ProjectModel.create_instance(
                      db_client=request.app.client_db)
 
-        project = project_model.get_project_or_create(project_id=project_id)
+        project = await project_model.get_project_or_create(project_id=project_id)
 
         nlp_Controller = NLPController(vectordb_client=request.app.vectordb_client, 
                  embedding_client = request.app.embedding_model , 
@@ -120,10 +119,11 @@ async def search_index(request: Request, project_id: str, search_request: Search
         project_model = await ProjectModel.create_instance(
                      db_client=request.app.client_db)
 
-        project = project_model.get_project_or_create(project_id=project_id)
+        project = await project_model.get_project_or_create(project_id=project_id)
 
         nlp_Controller = NLPController(vectordb_client=request.app.vectordb_client, 
                  embedding_client = request.app.embedding_model , 
+                 generation_client = request.app.generation_model,
         template_parser=request.app.template_parser,
     )
 
@@ -157,6 +157,7 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
 
         nlp_Controller = NLPController(vectordb_client=request.app.vectordb_client, 
                  embedding_client = request.app.embedding_model , 
+                 generation_client = request.app.generation_model,
         template_parser=request.app.template_parser,
     )
 

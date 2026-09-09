@@ -1,8 +1,11 @@
 from enum import Enum
 
-class LLMENums(Enum):
-    OpenAI = 'openai' 
-    CoHere = 'cohere ' 
+class LLMEnums(Enum):
+    OPENAI = "openai"
+    COHERE = "cohere"
+
+
+LLMENums = LLMEnums
     
 class OpenAIEnums (Enum):
     SYSTEM = "system"

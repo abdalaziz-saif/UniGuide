@@ -18,7 +18,7 @@ class NLPController(BaseController):
         self.vectordb_client = vectordb_client
         self.generation_client = generation_client
         self.embedding_client = embedding_client
-        self.template_parser = self.template_parser
+        self.template_parser = template_parser
 
 
     def create_collection_name (self, project_id):
@@ -32,8 +32,8 @@ class NLPController(BaseController):
         collection_name = self.create_collection_name(project_id=project.project_id)
         collection_info = self.vectordb_client.get_collection_info(collection_name=collection_name)
 
-        return json.load(
-            json.dumb(collection_info, default=lambda x: x.__dict__)
+        return json.loads(
+            json.dumps(collection_info, default=lambda x: x.__dict__)
         )
 
     def index_into_vectordb(self,project: Project,chunks: list[DataChunk], chunks_ids: list[int], do_reset: bool=False) :
@@ -46,11 +46,17 @@ class NLPController(BaseController):
         texts = [c.chunk_text for c in chunks]
         metadata = [c.chunk_metadata for c in chunks]
 
-        vectors = [
-
-               self.embedding_client.embed_text(text ,DocumentTypeEnum.DOCUMENT.value )
-            for text in texts 
-        ]
+        if hasattr(self.embedding_client, "embed_texts"):
+            vectors = self.embedding_client.embed_texts(
+                texts, DocumentTypeEnum.DOCUMENT.value
+            )
+        else:
+            vectors = [
+                self.embedding_client.embed_text(
+                    text, DocumentTypeEnum.DOCUMENT.value
+                )
+                for text in texts
+            ]
 
         # crate collection if not exist 
         _=self.vectordb_client.create_collection( collection_name = collection_name, 
@@ -67,7 +73,7 @@ class NLPController(BaseController):
 
         return True 
 
-    def search_vector_db_collection(self, project: Project, text: str, limit: int = 10):
+    def search_vector_db_collection(self, project: Project, text: str, limit: int = 5):
 
         # get collection_name 
         collection_name = self.create_collection_name(project_id=project.project_id)
@@ -76,7 +82,7 @@ class NLPController(BaseController):
         vector = self.embedding_client.embed_text(text ,DocumentTypeEnum.QUERY.value)
 
         # seart on vectore database 
-        results = self.vectordb_client.search_by_vector(collection_name=collection_name, vector=text, limit=limit)
+        results = self.vectordb_client.search_by_vector(collection_name=collection_name, vector=vector, limit=limit)
 
 
         if not results:
