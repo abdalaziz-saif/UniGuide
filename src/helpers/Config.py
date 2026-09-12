@@ -11,8 +11,12 @@ class Settings(BaseSettings):
     FILE_MAX_SIZE :int 
     FILES_DIR : str
     FILE_DEFAULT_CHUNK_SIZE :int 
-    MONGODB_URL : str 
-    MONGODB_DATABASE : str
+
+    POSTGRES_USERNAME: str="postgres"
+    POSTGRES_PASSWORD: str="PASSWORD"
+    POSTGRES_HOST: str="localhost"
+    POSTGRES_PORT: int=5432
+    POSTGRES_MAIN_DATABASE: str="minirag"
 
     GENERATION_BACKEND :str
     EMBEDDING_BACKEND  :str
