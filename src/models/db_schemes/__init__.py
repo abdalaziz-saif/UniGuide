@@ -1,3 +1,1 @@
-from .data_chunk import DataChunk, RetrievedDocument
-
-__all__ = ["DataChunk", "RetrievedDocument"]
+from models.db_schemes.minirag.schemes import Project, DataChunk, Asset, RetrievedDocument

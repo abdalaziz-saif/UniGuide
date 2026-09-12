@@ -6,10 +6,10 @@ from helpers.Config import get_settings , Settings
 from controller import DataController ,ProjectController , ProcessController
 from models import ResponseSignal
 
-from models.db_schemes.data_chunk import DataChunk
-from models.db_schemes.asset import Asset
+from models.db_schemes.minirag.schemes import DataChunk, Project, Asset
+
 from .schemes.data import ProcessRequest
-from models import ProjectModel , BaseDataModel , ChunkModel , AssetModel
+from models import ProjectModel , BaseModel , ChunkModel , AssetModel
 from models.Enums.AssetTypeEnum import AssetTypeEnum
 import aiofiles
 import logging 
@@ -23,7 +23,7 @@ data_route = APIRouter(
 )
 
 @data_route.post('/upload_files/{project_id}') 
-async def uploade(request : Request ,project_id: str, file: UploadFile = File(...), app_settings: Settings = Depends(get_settings)):
+async def uploade(request : Request ,project_id: int, file: UploadFile = File(...), app_settings: Settings = Depends(get_settings)):
 
        #ihave to get the db client from the app to pass it to Project class  so iwill use Request  
        
@@ -78,7 +78,7 @@ async def uploade(request : Request ,project_id: str, file: UploadFile = File(..
         )
 
         asset_resource = Asset(
-            asset_project_id=project.id,   # note that the asset project_id   is a project._id  not the number that we pass with endpoint 
+            asset_project_id=project.project_id,
             asset_type=AssetTypeEnum.FILE.value,
             asset_name=file_id,
             asset_size=os.path.getsize(file_path)
@@ -98,7 +98,7 @@ async def uploade(request : Request ,project_id: str, file: UploadFile = File(..
 
 
 @data_route.post('/process/{project_id}')        
-async def process(project_id: str , processrequest: ProcessRequest , request :Request):
+async def process(project_id: int , processrequest: ProcessRequest , request :Request):
      
 # get From the json request 
   # file_id = None 
@@ -127,7 +127,7 @@ async def process(project_id: str , processrequest: ProcessRequest , request :Re
     if processrequest.file_id :
 
         asset_record = await asset_model.get_asset_record(
-            asset_project_id=project.id ,
+            asset_project_id=project.project_id ,
             asset_name=processrequest.file_id 
         ) 
 
@@ -148,11 +148,11 @@ async def process(project_id: str , processrequest: ProcessRequest , request :Re
 # if user didnt pass the file_id  get all files thats in project_id 
 #___________________________________
         project_files = await asset_model.get_all_project_assets(
-            asset_project_id = project.id , asset_type = AssetTypeEnum.FILE.value
+            asset_project_id = project.project_id , asset_type = AssetTypeEnum.FILE.value
         )
 
         project_files_ids = {
-            record.id: record.asset_name
+            record.asset_id: record.asset_name
             for record in project_files
         }
 
@@ -172,7 +172,7 @@ async def process(project_id: str , processrequest: ProcessRequest , request :Re
         )
 # check if do_reset is True to delete all chunk realted with project_id 
     if processrequest.do_reset == 1 : 
-        _= await chunk_model.delete_chunks_by_project_id(project_id = project.id)
+        _= await chunk_model.delete_chunks_by_project_id(project_id = project.project_id)
 
 
 
@@ -210,7 +210,7 @@ async def process(project_id: str , processrequest: ProcessRequest , request :Re
                     chunk_text=chunk.page_content,
                     chunk_metadata=chunk.metadata,
                     chunk_order=i+1,
-                    chunk_project_id=project.id,
+                    chunk_project_id=project.project_id,
                     chunk_asset_id = asset_id
             
                 )

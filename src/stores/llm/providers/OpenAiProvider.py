@@ -22,6 +22,7 @@ class OpenAiProvider(llm_interface):
 
         self.generation_model_id = None 
         self.embedding_size = None
+        self.enums = OpenAIEnums
 
         self.client = OpenAI(
             base_url=self.base_url,
@@ -43,7 +44,7 @@ class OpenAiProvider(llm_interface):
     # process prompts   
     def process_text(self, text:str):
 
-        return text[:self.default_generation_max_output_tokens]
+        return text[:self.default_generation_max_output_tokens].strip()
     
 
     def generate_text(self, prompt, chat_history = [], max_output_tokens = None, temperature = None):
@@ -66,7 +67,7 @@ class OpenAiProvider(llm_interface):
             self.construct_prompt(prompt=prompt , role= OpenAIEnums.USER.value)
         )
 
-        response  = self.client.generate (
+        response = self.client.chat.completions.create(
             model = self.generation_model_id,
             messages = chat_history,
             max_tokens = max_output_tokens,
@@ -107,6 +108,6 @@ class OpenAiProvider(llm_interface):
         return {
 
                 "role" : role,
-                "content" : self.process_text(prompt) 
+                "content" : prompt,
 
         }

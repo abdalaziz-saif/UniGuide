@@ -7,3 +7,5 @@ mongodb/*
 *.pid
 
 .env
+
+pgvector/*

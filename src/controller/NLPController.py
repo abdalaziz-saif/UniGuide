@@ -2,8 +2,8 @@ from dis import Instruction
 from email.policy import default
 import json
 from controller import BaseController
-from models.db_schemes.data_chunk import DataChunk
-from models.db_schemes.project import Project
+from models.db_schemes.minirag.schemes import DataChunk, Project
+
 from stores.vectorDB import VectorDBFactory
 from models.ChunkModel import ChunkModel
 from stores.llm.LLMEnums import DocumentTypeEnum
@@ -112,7 +112,7 @@ class NLPController(BaseController):
         documents_prompts = "\n".join([
             self.template_parser.get("rag", "document_prompt", {
                     "doc_num": idx + 1,
-                    "chunk_text": doc.text,
+                    "chunk_text": self.generation_client.proecess_text(doc.text),
             })
             for idx, doc in enumerate(retrieved_documents)
         ])

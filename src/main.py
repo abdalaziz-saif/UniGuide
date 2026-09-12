@@ -7,6 +7,9 @@ from helpers import get_settings
 from stores.llm import LLMFactory
 from stores.llm.template.template_parser import Templateparser
 from stores.vectorDB import VectorDBFactory
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+
 
 app = FastAPI()
 
@@ -14,8 +17,13 @@ app = FastAPI()
 @app.on_event('startup') 
 async def on_start_up():
     settings = get_settings()
-    app.mongo_conn = AsyncIOMotorClient(settings.MONGODB_URL)
-    app.client_db = app.mongo_conn[settings.MONGODB_DATABASE]
+
+    postgres_conn = f"postgresql+asyncpg://{settings.POSTGRES_USERNAME}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_MAIN_DATABASE}"
+
+    app.db_engine = create_async_engine(postgres_conn)
+    app.client_db = sessionmaker(
+        app.db_engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     llm_provider_factory = LLMFactory(settings)
 
@@ -43,7 +51,7 @@ async def on_start_up():
 # turn it off when shutdown app 
 @app.on_event('shutdown')
 async def on_shutdown():
-    app.mongo_conn.close()
+    app.vectordb_client.disconnect()
   
 # include the base_route in the main app
 app.include_router(base.base_route)

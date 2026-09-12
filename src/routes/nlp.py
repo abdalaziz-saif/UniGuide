@@ -14,7 +14,7 @@ nlp_router = APIRouter(
 
 
 @nlp_router.post("/index/push/{project_id}")
-async def index_project(request: Request, project_id: str, push_request: PushRequest):
+async def index_project(request: Request, project_id: int, push_request: PushRequest):
 
     
     
@@ -52,7 +52,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
         idx = 0
 
         while has_records:
-            page_chunks = await chunk_model.get_poject_chunks(project_id=project.id, page_no=page_no)
+            page_chunks = await chunk_model.get_poject_chunks(project_id=project.project_id, page_no=page_no)
             if len(page_chunks):
                 page_no += 1
             
@@ -88,7 +88,7 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
         )
 
 @nlp_router.get("/index/info/{project_id}")
-async def get_collection_info(request:Request, project_id:str ):
+async def get_collection_info(request:Request, project_id: int ):
 
         project_model = await ProjectModel.create_instance(
                      db_client=request.app.client_db)
@@ -147,13 +147,13 @@ async def search_index(request: Request, project_id: str, search_request: Search
     )
 
 @nlp_router.post("/index/answer/{project_id}")
-async def answer_rag(request: Request, project_id: str, search_request: SearchRequest):
+async def answer_rag(request: Request, project_id: int, search_request: SearchRequest):
 
 
         project_model = await ProjectModel.create_instance(
                      db_client=request.app.client_db)
 
-        project = project_model.get_project_or_create(project_id=project_id)
+        project = await project_model.get_project_or_create(project_id=project_id)
 
         nlp_Controller = NLPController(vectordb_client=request.app.vectordb_client, 
                  embedding_client = request.app.embedding_model , 
