@@ -1,11 +1,25 @@
-from enum import Enum 
+from enum import Enum
 
-
-class VectorDBProvider(Enum):
-
+class VectorDBEnums(Enum):
     QDRANT = "QDRANT"
+    PGVECTOR = "PGVECTOR"
 
+class DistanceMethodEnums(Enum):
+    COSINE = "cosine"
+    DOT = "dot"
 
-class DistnaceMethode(Enum):
+class PgVectorTableSchemeEnums(Enum):
+    ID = 'id'
+    TEXT = 'text'
+    VECTOR = 'vector'
+    CHUNK_ID = 'chunk_id'
+    METADATA = 'metadata'
+    _PREFIX = 'pgvector'
 
-    Cosine = "cosnie"
+class PgVectorDistanceMethodEnums(Enum):
+    COSINE = "vector_cosine_ops"
+    DOT = "vector_l2_ops"
+
+class PgVectorIndexTypeEnums(Enum):
+    HNSW = "hnsw"
+    IVFFLAT = "ivfflat"

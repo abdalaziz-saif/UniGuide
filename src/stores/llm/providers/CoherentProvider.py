@@ -1,3 +1,5 @@
+from ctypes import Union
+
 from ..LLMInterface import llm_interface 
 from ..LLMEnums import CoHereEnums,DocumentTypeEnum
 import logging
@@ -68,12 +70,13 @@ class CohereProvider(llm_interface):
             return None
         
         return response.text
-    
-    def embed_text(self, text: str, document_type: str = None):
+  
+
+    def embed_texts(self, text: Union[str, list[str]], document_type: str = None):
         if not self.client:
             self.logger.error("CoHere client was not set")
             return None
-        
+
         if not self.embedding_model_id:
             self.logger.error("Embedding model for CoHere was not set")
             return None
@@ -83,31 +86,8 @@ class CohereProvider(llm_interface):
         if document_type == DocumentTypeEnum.QUERY.value:
             input_type = CoHereEnums.QUERY.value
 
-        response = self.client.embed(
-            model = self.embedding_model_id,
-            texts = [self.process_text(text)],
-            input_type = input_type,
-            embedding_types=['float'],
-        )
-
-        if not response or not response.embeddings or not response.embeddings.float:
-            self.logger.error("Error while embedding text with CoHere")
-            return None
-        
-        return response.embeddings.float[0] 
-
-    def embed_texts(self, texts: list[str], document_type: str = None):
-        if not self.client:
-            self.logger.error("CoHere client was not set")
-            return None
-
-        if not self.embedding_model_id:
-            self.logger.error("Embedding model for CoHere was not set")
-            return None
-
-        input_type = CoHereEnums.DOCUMENT.value
-        if document_type == DocumentTypeEnum.QUERY.value:
-            input_type = CoHereEnums.QUERY.value
+        if isinstance(text, str):
+            text = [text]
 
         response = self.client.embed(
             model=self.embedding_model_id,

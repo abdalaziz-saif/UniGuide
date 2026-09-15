@@ -5,6 +5,7 @@ from  fastapi.responses import JSONResponse
 from helpers.Config import get_settings , Settings 
 from controller import DataController ,ProjectController , ProcessController
 from models import ResponseSignal
+from controller import NLPController
 
 from models.db_schemes.minirag.schemes import DataChunk, Project, Asset
 
@@ -104,6 +105,7 @@ async def process(project_id: int , processrequest: ProcessRequest , request :Re
   # file_id = None 
     chunk_size = processrequest.chunk_size 
     overlap_size = processrequest.overlap_size 
+    do_reset = processrequest.do_reset
 
 
 
@@ -121,6 +123,12 @@ async def process(project_id: int , processrequest: ProcessRequest , request :Re
            request.app.client_db 
     )
 
+    nlp_controller = NLPController(
+        vectordb_client=request.app.vectordb_client,
+        generation_client=request.app.generation_client,
+        embedding_client=request.app.embedding_client,
+        template_parser=request.app.template_parser,)
+    
 # if the user sent the file_id 
     
     project_files_ids = {}
@@ -147,6 +155,7 @@ async def process(project_id: int , processrequest: ProcessRequest , request :Re
     else :
 # if user didnt pass the file_id  get all files thats in project_id 
 #___________________________________
+
         project_files = await asset_model.get_all_project_assets(
             asset_project_id = project.project_id , asset_type = AssetTypeEnum.FILE.value
         )
@@ -170,8 +179,14 @@ async def process(project_id: int , processrequest: ProcessRequest , request :Re
     chunk_model = await ChunkModel.create_instance(
             request.app.client_db 
         )
+    
 # check if do_reset is True to delete all chunk realted with project_id 
-    if processrequest.do_reset == 1 : 
+    if do_reset == 1 :
+
+        # delete associated vectors collection
+        collection_name = nlp_controller.create_collection_name(project_id=project.project_id)
+        _ = await request.app.vectordb_client.delete_collection(collection_name=collection_name)
+
         _= await chunk_model.delete_chunks_by_project_id(project_id = project.project_id)
 
 
