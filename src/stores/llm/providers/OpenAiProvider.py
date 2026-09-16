@@ -44,8 +44,7 @@ class OpenAiProvider(llm_interface):
     # process prompts   
     def process_text(self, text:str):
 
-        return text[:self.default_generation_max_output_tokens].strip()
-    
+        return text[:self.default_input_max_characters].strip()
 
     def generate_text(self, prompt, chat_history = [], max_output_tokens = None, temperature = None):
 
@@ -91,7 +90,7 @@ class OpenAiProvider(llm_interface):
             self.logger.error("The Embedding model not set")
             return None 
 
-        response = self.client.embeddings.creat(
+        response = self.client.embeddings.create(
             input = text , 
             model = self.embedding_model_id
         )   

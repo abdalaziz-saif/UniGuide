@@ -1,4 +1,4 @@
-from ..VectorDBInterface import VectorDBInterface
+from ..VectorInterface import VectorDBInterface
 from ..VectorDBEnums import (DistanceMethodEnums, PgVectorTableSchemeEnums, 
                              PgVectorDistanceMethodEnums, PgVectorIndexTypeEnums)
 import logging

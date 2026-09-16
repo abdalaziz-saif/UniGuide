@@ -27,18 +27,24 @@ async def on_start_up():
 
     llm_provider_factory = LLMFactory(settings)
 
-    #generation model 
+    # generation model
     app.generation_model = llm_provider_factory.create(provider=settings.GENERATION_BACKEND)
     app.generation_model.set_generation_model(settings.GENERATION_MODEL_ID)
+    app.generation_client = app.generation_model
 
-    #Embedding Model 
+    # embedding model
     app.embedding_model = llm_provider_factory.create(provider=settings.EMBEDDING_BACKEND)
-    app.embedding_model.set_embedding_model(settings.EMBEDDING_MODEL_ID , settings.EMBEDDING_MODEL_SIZE)
+    app.embedding_model.set_embedding_model(settings.EMBEDDING_MODEL_ID, settings.EMBEDDING_MODEL_SIZE)
+    app.embedding_client = app.embedding_model
 
-    #VectorDB Client 
- 
-    app.vectordb_client = VectorDBFactory(settings).create(provider=settings.VECTOR_DB_BACKEND)
-    app.vectordb_client.connect()
+    # vector db client
+    app.vectordb_client = VectorDBFactory(
+        config=settings,
+        db_client=app.client_db,
+    ).create(provider=settings.VECTOR_DB_BACKEND)
+    if app.vectordb_client is None:
+        raise RuntimeError(f"Unsupported vector DB backend: {settings.VECTOR_DB_BACKEND}")
+    await app.vectordb_client.connect()
 
 
     #Generationn Template 
@@ -51,7 +57,7 @@ async def on_start_up():
 # turn it off when shutdown app 
 @app.on_event('shutdown')
 async def on_shutdown():
-    app.vectordb_client.disconnect()
+    await app.vectordb_client.disconnect()
   
 # include the base_route in the main app
 app.include_router(base.base_route)

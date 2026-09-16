@@ -14,11 +14,11 @@ from models.db_schemes import RetrievedDocument
 
 class QdrantDBProvider(VectorDBInterface):
 
-    async def  __init__(self, file_path: str, distance_methode: str):
-
+    def __init__(self, file_path: str, default_vector_size: int = 786,
+                                     distance_method: str = None, index_threshold: int=100):
         self.client = None
         self.file_path = file_path
-        self.distance_methode = distance_methode
+        self.distance_methode = distance_method
         self.logger = logging.getLogger('uvicorn')
 
     async def  connect(self):

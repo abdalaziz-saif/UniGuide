@@ -26,8 +26,9 @@ class ProjectModel(BaseDataModel):
         async with self.db_client() as session:
             async with session.begin():
                 session.add(project)
-            await session.commit()
+                await session.flush()
             await session.refresh(project)
+        return project
 
 
     async def get_project_or_create(self, project_id):
