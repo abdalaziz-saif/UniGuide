@@ -47,11 +47,22 @@ class NLPController(BaseController):
         metadata = [c.chunk_metadata for c in chunks]
 
       
-        vectors = self.embedding_client.embed_text(
+        try:
+
+            vectors = self.embedding_client.embed_text(
                 texts, DocumentTypeEnum.DOCUMENT.value
             )
-        
-       
+        except Exception as exc:
+            self.logger.error(f"Embedding failed for collection {collection_name}: {exc}")
+            return False
+
+        if not vectors or len(vectors) != len(texts):
+            self.logger.error(
+                f"Embedding returned empty or mismatched vectors for collection {collection_name}: "
+                f"expected={len(texts)}, received={None if vectors is None else len(vectors)}"
+            )
+            return False
+
         # crate collection if not exist 
         _= await self.vectordb_client.create_collection( collection_name = collection_name, 
                                                  embedding_size=self.embedding_client.embedding_size , 
@@ -79,8 +90,10 @@ class NLPController(BaseController):
         if not vectors or len(vectors) == 0 : 
             return False 
 
-        if vectors  or len(vectors)>0 : 
+        if isinstance(vectors[0], (list, tuple)):
             query_vector = vectors[0]
+        else:
+            query_vector = vectors
 
         if not query_vector:
             return False 

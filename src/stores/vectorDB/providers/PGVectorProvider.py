@@ -14,13 +14,18 @@ class PGVectorProvider(VectorDBInterface):
         
         self.db_client = db_client
         self.default_vector_size = default_vector_size
-        
+
         self.index_threshold = index_threshold
 
-        if distance_method == DistanceMethodEnums.COSINE.value:
+        normalized_distance_method = (distance_method or "").strip().lower()
+        if normalized_distance_method == DistanceMethodEnums.COSINE.value:
             distance_method = PgVectorDistanceMethodEnums.COSINE.value
-        elif distance_method == DistanceMethodEnums.DOT.value:
+        elif normalized_distance_method == DistanceMethodEnums.DOT.value:
             distance_method = PgVectorDistanceMethodEnums.DOT.value
+        elif normalized_distance_method in {item.value.lower() for item in PgVectorDistanceMethodEnums}:
+            distance_method = next(item.value for item in PgVectorDistanceMethodEnums if item.value.lower() == normalized_distance_method)
+        else:
+            distance_method = PgVectorDistanceMethodEnums.COSINE.value
 
         self.pgvector_table_prefix = PgVectorTableSchemeEnums._PREFIX.value
         self.distance_method = distance_method

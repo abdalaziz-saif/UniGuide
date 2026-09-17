@@ -92,12 +92,16 @@ class CohereProvider(llm_interface):
         else:
             texts = [self.process_text(item) for item in text]
 
-        response = self.client.embed(
-            model=self.embedding_model_id,
-            texts=texts,
-            input_type=input_type,
-            embedding_types=['float'],
-        )
+        try:
+            response = self.client.embed(
+                model=self.embedding_model_id,
+                texts=texts,
+                input_type=input_type,
+                embedding_types=['float'],
+            )
+        except Exception as exc:
+            self.logger.error(f"CoHere embedding failed: {exc}")
+            raise
 
         if not response or not response.embeddings or not response.embeddings.float:
             self.logger.error("Error while embedding texts with CoHere")

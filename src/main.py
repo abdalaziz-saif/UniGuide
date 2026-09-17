@@ -20,7 +20,11 @@ async def on_start_up():
 
     postgres_conn = f"postgresql+asyncpg://{settings.POSTGRES_USERNAME}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_MAIN_DATABASE}"
 
-    app.db_engine = create_async_engine(postgres_conn)
+    app.db_engine = create_async_engine(
+        postgres_conn,
+        pool_pre_ping=True,
+        pool_recycle=1800,
+    )
     app.client_db = sessionmaker(
         app.db_engine, class_=AsyncSession, expire_on_commit=False
     )

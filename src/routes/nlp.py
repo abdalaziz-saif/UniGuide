@@ -126,7 +126,7 @@ async def get_collection_info(request:Request, project_id: int ):
 
 
 @nlp_router.post("/index/search/{project_id}")
-async def search_index(request: Request, project_id: str, search_request: SearchRequest):
+async def search_index(request: Request, project_id: int, search_request: SearchRequest):
 
 
 
