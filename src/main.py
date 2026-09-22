@@ -10,8 +10,12 @@ from stores.vectorDB import VectorDBFactory
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
+from utils.metrics import setup_metrics
 
 app = FastAPI()
+
+# Setup Prometheus metrics
+setup_metrics(app)
 
 # make motor connect directly when startup the app 
 @app.on_event('startup') 

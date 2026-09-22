@@ -17,3 +17,8 @@ SQLAlchemy==2.0.51
 asyncpg==0.31.0
 alembic==1.18.4
 psycopg2==2.9.12
+
+# Monitoring and metrics
+prometheus-client==0.26.0
+starlette-exporter==0.24.0
+fastapi-health==0.4.0
