@@ -1,6 +1,14 @@
 
  # UniGuide
 
+[![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Qdrant](https://img.shields.io/badge/Qdrant-Vector%20Search-DC244C?logo=qdrant&logoColor=white)](https://qdrant.tech/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/)
+[![Grafana](https://img.shields.io/badge/Grafana-Dashboards-F46800?logo=grafana&logoColor=white)](https://grafana.com/)
+[![Nginx](https://img.shields.io/badge/Nginx-Reverse%20Proxy-009639?logo=nginx&logoColor=white)](https://nginx.org/)
+
 UniGuide is a Retrieval-Augmented Generation (RAG) application built for universities.
 It helps students find clear answers about university policies, course registration,
 academic requirements, books, lectures, and other university resources.
