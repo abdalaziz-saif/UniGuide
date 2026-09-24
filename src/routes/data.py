@@ -201,7 +201,13 @@ async def process(project_id: int , processrequest: ProcessRequest , request :Re
         
         if file_content is None:
             logger.error(f"Error while processing file: {file_id}")
-            continue
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={
+                    "signal": ResponseSignal.PROCESSING_FAILED.value,
+                    "file_id": file_id,
+                }
+            )
             
         file_chunks = process_controller.process_file_content(
                 file_content=file_content ,

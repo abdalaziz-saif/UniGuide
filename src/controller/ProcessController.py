@@ -1,8 +1,13 @@
 from .BaseController import BaseController
 from .ProjectController import ProjectController
 import os 
+import logging
 from langchain_docling.loader import DoclingLoader 
+from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+
+logger = logging.getLogger(__name__)
 
 class ProcessController(BaseController):
 
@@ -21,8 +26,23 @@ class ProcessController(BaseController):
                 file_id
             )
         
-            loader = DoclingLoader(self.file_path) 
-            return  loader.load()  # the output will be in shape document(text =  , metadata = )
+            try:
+                file_extension = os.path.splitext(self.file_path)[1].lower()
+
+                if file_extension in (".txt", ".text"):
+                    with open(self.file_path, "r", encoding="utf-8", errors="replace") as file:
+                        return [
+                            Document(
+                                page_content=file.read(),
+                                metadata={"source": file_id},
+                            )
+                        ]
+
+                loader = DoclingLoader(self.file_path)
+                return loader.load()  # the output will be in shape document(text =  , metadata = )
+            except Exception as exc:
+                logger.exception("Error while extracting file %s: %s", self.file_path, exc)
+                return None
         return None 
     # split the content to chunks  
     def process_file_content(self , file_content :list , chunk_size : int =100  , overlap_size :int =20):

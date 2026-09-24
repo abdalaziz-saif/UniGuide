@@ -111,6 +111,8 @@ services:
   node-exporter:
     image: prom/node-exporter:v1.9.1
     container_name: node-exporter
+    profiles:
+      - linux-host
     ports:
       - "9100:9100"
     volumes:

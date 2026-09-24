@@ -11,7 +11,7 @@ This directory contains the Docker setup for the MiniRAG application, including 
 - **Qdrant**: Vector database for similarity search
 - **Prometheus**: Metrics collection
 - **Grafana**: Visualization dashboard for metrics
-- **Node-Exporter**: System metrics collection
+- **Node-Exporter**: Linux host system metrics collection
 
 ## Setup Instructions
 

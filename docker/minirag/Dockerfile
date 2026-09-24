@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y \
 
 COPY src/requirements.txt .
 
+# Docling's PDF layout pipeline needs torchvision for its image processor.
+RUN uv pip install torch torchvision --system --index-url https://download.pytorch.org/whl/cpu
 RUN uv pip install -r requirements.txt --system
 
 COPY src/ .

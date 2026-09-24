@@ -7,6 +7,8 @@ aiofiles==25.1.0
 pydantic==2.13.4
 langchain==1.3.12
 langchain_docling
+docling-parse
+marko
 motor==3.7.1
 langchain_text_splitters
 pymongo==4.17.0

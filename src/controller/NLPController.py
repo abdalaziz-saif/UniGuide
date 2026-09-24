@@ -109,10 +109,15 @@ class NLPController(BaseController):
         return results
 
 
-    async def answer_rag_question(self, project: Project, query: str, limit: int = 10):
+    async def answer_rag_question(self,
+                                project: Project,
+                                query: str,
+                                chat_history: list = None,
+                                limit: int = 10,
+                                ):
 
 
-        answer, full_prompt, chat_history = None, None, None
+        answer, full_prompt = None, None
 
         # step1: retrieve related documents
         retrieved_documents = await self.search_vector_db_collection(
@@ -138,6 +143,7 @@ class NLPController(BaseController):
         footer_prompt = self.template_parser.get("rag", "footer_prompt")
 
         # step3: Construct Generation Client Prompts
+        previous_messages = chat_history or []
         chat_history = [
             self.generation_client.construct_prompt(
                 prompt=system_prompt,
@@ -145,7 +151,20 @@ class NLPController(BaseController):
             )
         ]
 
-        full_prompt = "\n\n".join([ documents_prompts,  footer_prompt])
+        for message in previous_messages:
+            role = getattr(self.generation_client.enums, message.role.upper())
+            chat_history.append(
+                self.generation_client.construct_prompt(
+                    prompt=message.content,
+                    role=role.value,
+                )
+            )
+
+        full_prompt = "\n\n".join([
+            documents_prompts,
+            f"Current student question:\n{query}",
+            footer_prompt,
+        ])
 
         # step4: Retrieve the Answer
         answer = self.generation_client.generate_text(
